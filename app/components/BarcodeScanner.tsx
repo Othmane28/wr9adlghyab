@@ -27,8 +27,10 @@ decodeHints.set(DecodeHintType.POSSIBLE_FORMATS, [
   BarcodeFormat.AZTEC,
 ]);
 
+decodeHints.set(DecodeHintType.TRY_HARDER, true);
+
 const readerOptions = {
-  delayBetweenScanAttempts: 120,
+  delayBetweenScanAttempts: 60,
   delayBetweenScanSuccess: 800,
   tryPlayVideoTimeout: 8000,
 };
@@ -149,8 +151,8 @@ export default function BarcodeScanner() {
       const constraints: MediaStreamConstraints = {
         audio: false,
         video: deviceId
-          ? { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }
-          : { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          ? { deviceId: { exact: deviceId }, width: { ideal: 1920 }, height: { ideal: 1080 } }
+          : { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } },
       };
 
       let stream: MediaStream;
@@ -162,6 +164,14 @@ export default function BarcodeScanner() {
       }
       warmup?.getTracks().forEach((track) => track.stop());
       streamRef.current = stream;
+
+      try {
+        await stream.getVideoTracks()[0]?.applyConstraints({
+          advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet],
+        });
+      } catch {
+        // focusMode is not supported on every device
+      }
 
       const reader = new BrowserMultiFormatReader(decodeHints, readerOptions);
       readerRef.current = reader;
