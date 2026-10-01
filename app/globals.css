@@ -1,26 +1,106 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --paper: #f3f0e8;
+  --card: #fbfaf6;
+  --ink: #1b1a17;
+  --muted: #8a857a;
+  --line: #dcd7cb;
+  --accent: #d6452b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --paper: #151412;
+    --card: #1e1d1a;
+    --ink: #eeeae0;
+    --muted: #8b867b;
+    --line: #34322d;
+    --accent: #ff6a4d;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: light dark;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Torn-paper bottom edge for the receipt. */
+.receipt {
+  --zz: 7px;
+  padding-bottom: calc(var(--zz) + 1.25rem);
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / calc(2 * var(--zz)) 100%;
+}
+
+.dash {
+  border: 0;
+  border-top: 1px dashed var(--line);
+}
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.row-in {
+  animation: row-in 240ms ease-out;
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-12deg) scale(1.8);
+  }
+  15%,
+  75% {
+    opacity: 1;
+    transform: rotate(-12deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-12deg) scale(1);
+  }
+}
+
+.stamp {
+  animation: stamp 1400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes bump {
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.bump {
+  animation: bump 320ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row-in,
+  .bump {
+    animation: none;
+  }
+  .stamp {
+    display: none;
+  }
 }
