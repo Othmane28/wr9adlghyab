@@ -4,26 +4,23 @@ import { isCategory, type Expense } from "./expense-types";
 // Storage is a Google Sheet behind an Apps Script web app (see README).
 function config() {
   const url = process.env.SHEETS_URL;
-  const secret = process.env.SHEETS_SECRET;
-  if (!url || !secret) {
-    throw new Error("Set SHEETS_URL and SHEETS_SECRET in .env.local, then restart the dev server.");
-  }
-  return { url, secret };
+  if (!url) throw new Error("Set SHEETS_URL in .env.local, then restart the dev server.");
+  return url;
 }
 
 async function call<T>(init: { method: "GET" } | { method: "POST"; body: Record<string, unknown> }): Promise<T> {
-  const { url, secret } = config();
+  const url = config();
 
   let response: Response;
   try {
     response =
       init.method === "GET"
-        ? await fetch(`${url}?secret=${encodeURIComponent(secret)}`, { cache: "no-store" })
+        ? await fetch(url, { cache: "no-store" })
         : await fetch(url, {
             method: "POST",
             // text/plain keeps Apps Script from rejecting the request on content type
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ ...init.body, secret }),
+            body: JSON.stringify(init.body),
             cache: "no-store",
           });
   } catch {
@@ -32,9 +29,7 @@ async function call<T>(init: { method: "GET" } | { method: "POST"; body: Record<
 
   const data = (await response.json().catch(() => null)) as (T & { error?: string }) | null;
   if (!data) throw new Error("Google Sheets sent back something unexpected. Is the script deployed as a web app?");
-  if (data.error) {
-    throw new Error(data.error === "unauthorized" ? "Wrong SHEETS_SECRET in .env.local." : data.error);
-  }
+  if (data.error) throw new Error(data.error);
   return data;
 }
 
