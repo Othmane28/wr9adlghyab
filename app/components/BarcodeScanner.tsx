@@ -222,6 +222,7 @@ export default function BarcodeScanner() {
   }, [isScanning, startScanner]);
 
   useEffect(() => {
+    cancelledRef.current = false;
     return () => {
       cancelledRef.current = true;
       controlsRef.current?.stop();
