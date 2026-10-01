@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 import { CATEGORIES, CURRENCY, type Category, type Expense } from "@/lib/expense-types";
 
 const BUDGET_KEY = "masrouf.budget";
+const THEME_KEY = "masrouf.theme";
 const DEFAULT_BUDGET = 100;
 const QUICK_ADD = [5, 10, 20, 50];
 const GAUGE_TICKS = 20;
@@ -52,6 +53,39 @@ function mood(total: number, budget: number): string {
 
 function errorText(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
+}
+
+function ThemeToggle() {
+  const [dark, setDark] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const forced = document.documentElement.dataset.theme;
+    // The theme lives on <html> (set before paint), so it can only be read after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDark(forced ? forced === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }, []);
+
+  function toggle() {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.dataset.theme = next ? "dark" : "light";
+    try {
+      localStorage.setItem(THEME_KEY, next ? "dark" : "light");
+    } catch {
+      // storage blocked; theme lasts for this visit only
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={dark ? "Switch to light theme" : "Switch to dark theme"}
+      className="rounded-full border border-line px-3 py-1 font-mono text-xs text-muted transition hover:border-ink hover:text-ink active:scale-95"
+    >
+      {dark === null ? "theme" : dark ? "light" : "dark"}
+    </button>
+  );
 }
 
 export default function Tracker() {
@@ -261,9 +295,12 @@ export default function Tracker() {
     <div className="mx-auto flex w-full max-w-md flex-col gap-12 px-4 pb-16 pt-8">
       <header className="flex items-baseline justify-between">
         <span className="font-mono text-sm font-semibold tracking-tight">masrouf</span>
-        <span className="text-sm text-muted">
-          {fromDateKey(today).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted">
+            {fromDateKey(today).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+          </span>
+          <ThemeToggle />
+        </div>
       </header>
 
       <section aria-label="Spent today">
