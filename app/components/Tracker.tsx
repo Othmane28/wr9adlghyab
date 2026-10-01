@@ -519,12 +519,7 @@ export default function Tracker() {
         </p>
       )}
 
-      <footer className="flex items-center justify-between text-xs text-muted">
-        <span>saved to data/expenses.xlsx</span>
-        <a href="/api/expenses/export" className="underline underline-offset-4 hover:text-ink">
-          download .xlsx
-        </a>
-      </footer>
+      <footer className="text-xs text-muted">saved to your Google Sheet</footer>
     </div>
   );
 }
